@@ -1,36 +1,36 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاز ميتامسك - منصة الجسور</title>
+    <title>Gas MetaMask - Bridge Platform</title>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; direction: rtl; }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
         button { padding: 10px; margin: 10px; cursor: pointer; }
         input, select { padding: 8px; margin: 5px; }
     </style>
 </head>
 <body>
-    <h1>جاز ميتامسك - منصة الجسور</h1>
+    <h1>Gas MetaMask - Bridge Platform</h1>
     
-    <button id="connectWallet">اتصل بمحفظة ميتامسك</button>
-    <p id="walletAddress">لم يتم الاتصال بعد</p>
+    <button id="connectWallet">Connect MetaMask</button>
+    <p id="walletAddress">Not connected</p>
 
-    <h2>إرسال العملات عبر الجسر</h2>
-    <label>المبلغ:</label>
-    <input type="number" id="amount" placeholder="أدخل المبلغ">
+    <h2>Send Tokens via Bridge</h2>
+    <label>Amount:</label>
+    <input type="number" id="amount" placeholder="Enter amount">
     
     <select id="coinType">
         <option value="ETH">Ethereum (ETH)</option>
         <option value="BNB">Binance Coin (BNB)</option>
     </select>
 
-    <button id="sendTransaction">إرسال</button>
+    <button id="sendTransaction">Send</button>
     <p id="status"></p>
 
-    <h2>النقاط المكتسبة</h2>
-    <p id="points">0 نقطة</p>
+    <h2>Earned Points</h2>
+    <p id="points">0 points</p>
 
     <script>
         let provider, signer;
@@ -40,18 +40,23 @@
         document.getElementById("connectWallet").addEventListener("click", async () => {
             if (window.ethereum) {
                 provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                signer = provider.getSigner();
-                userAddress = await signer.getAddress();
-                document.getElementById("walletAddress").innerText = العنوان: ${userAddress};
+                try {
+                    await provider.send("eth_requestAccounts", []);
+                    signer = provider.getSigner();
+                    userAddress = await signer.getAddress();
+                    document.getElementById("walletAddress").innerText = Connected: ${userAddress};
+                } catch (error) {
+                    console.error("Connection failed", error);
+                    alert("Connection to MetaMask failed.");
+                }
             } else {
-                alert("يرجى تثبيت محفظة ميتامسك!");
+                alert("Please install MetaMask!");
             }
         });
 
         document.getElementById("sendTransaction").addEventListener("click", async () => {
             if (!signer) {
-                alert("يرجى الاتصال بمحفظة ميتامسك أولاً!");
+                alert("Please connect to MetaMask first!");
                 return;
             }
 
@@ -67,19 +72,19 @@
 
             try {
                 const tx = await signer.sendTransaction({
-                    to: "0xYourBridgeContractAddress", // استبدل بعنوان العقد الذكي للجسر
+                    to: "0xYourBridgeContractAddress", // Replace with actual bridge contract address
                     value: ethers.utils.parseEther(amount)
                 });
 
-                document.getElementById("status").innerText = "جاري تنفيذ المعاملة...";
+                document.getElementById("status").innerText = "Transaction pending...";
                 await tx.wait();
-                document.getElementById("status").innerText = "تمت المعاملة بنجاح!";
+                document.getElementById("status").innerText = "Transaction successful!";
 
                 points += pointsEarned;
-                document.getElementById("points").innerText = ${points} نقطة;
+                document.getElementById("points").innerText = ${points} points;
 
             } catch (error) {
-                document.getElementById("status").innerText = "فشلت المعاملة!";
+                document.getElementById("status").innerText = "Transaction failed!";
                 console.error(error);
             }
         });
